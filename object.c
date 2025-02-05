@@ -43,3 +43,50 @@ object_t *__new_vector3__(object_t *x, object_t *y, object_t *z)
     return (new_object);
 }
 
+object_t *__new_array__(size_t size)
+{
+    object_t *new_array = malloc(sizeof(object_t));
+    if (!new_array)
+        return (NULL);
+    object_t **array = calloc(size, sizeof(object_t));
+    if (!array)
+    {
+        free(new_array);
+        return (NULL);
+    }
+    new_array->type = ARRAY;
+    new_array->data.v_array.size = size;
+    new_array->data.v_array.elements = array;
+    return (new_array);
+}
+bool     array_set(object_t *object, size_t index, object_t *value)
+{
+    if (!object || !value || object->type != ARRAY \
+        || object->data.v_array.size <= index)
+        return (false);
+    object->data.v_array.elements[index] = value;
+    return (true);
+}
+
+object_t *array_get(object_t *object, size_t index)
+{
+    if (!object || object->type != ARRAY || object->data.v_array.size <= index)
+        return (NULL);
+    return (object->data.v_array.elements[index]);
+}
+
+int      length(object_t *object)
+{
+    if (!object->type)
+        return (NULL);
+    else if (object->type == INTEGER || object->type == FLOAT)
+        return (1);
+    else if (object->type == VECTOR3)
+        return (3);
+    else if (object->type == STRING && object->data.v_string != NULL)
+        return (strlen(object->data.v_string));
+    else if (object->type == ARRAY)
+        return (object->data.v_array.size);
+    else
+        return (-1);
+}
