@@ -40,6 +40,7 @@ typedef union object_data {
 typedef struct object {
     object_type type;
     object_data data;
+    long int    refcount;
 } object_t;
 
 object_t *__new_integer__(int value);
@@ -50,6 +51,10 @@ object_t *__new_array__(size_t size);
 bool     array_set(object_t *object, size_t index, object_t *value);
 object_t *array_get(object_t *object, size_t index);
 int      length(object_t *object);
+object_t *__new_object__();
+void     refCount_inc(object_t *object);
+void     refCount_dec(object_t *object);
+void     refCount_free(object_t *object);
 
 
 #endif
