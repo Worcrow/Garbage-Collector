@@ -82,8 +82,8 @@ object_t *array_get(object_t *object, size_t index)
 
 int      length(object_t *object)
 {
-    if (!object->type)
-        return (NULL);
+    if (!object || !object->type)
+        return (-1);
     else if (object->type == INTEGER || object->type == FLOAT)
         return (1);
     else if (object->type == VECTOR3)
@@ -115,10 +115,10 @@ void    refCount_inc(object_t *object)
 void    refCount_dec(object_t *object)
 {
     if (!object)
-        return (NULL);
+        return ;
     object->refcount -= 1;
     if (object->refcount == 0)
-        return (refCount_free);
+        return (refCount_free(object));
 }
 
 void    refCount_free(object_t *object)
