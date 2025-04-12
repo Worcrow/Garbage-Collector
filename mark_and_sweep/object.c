@@ -40,9 +40,6 @@ object_t *__new_vector3__(object_t *x, object_t *y, object_t *z)
     if (!new_object)
         return (NULL);
     new_object->type = VECTOR3;
-    //refCount_inc(x);
-    //refCount_inc(y);
-    //refCount_inc(z);
     new_object->data.v_vector3 = (vector_t){x, y, z};
     return (new_object);
 }
@@ -68,8 +65,6 @@ bool     array_set(object_t *object, size_t index, object_t *value)
     if (!object || !value || object->type != ARRAY \
         || object->data.v_array.size <= index)
         return (false);
-    //refCount_dec(object->data.v_array.elements[index]);
-    //refCount_inc(value);
     object->data.v_array.elements[index] = value;;
     return (true);
 }
