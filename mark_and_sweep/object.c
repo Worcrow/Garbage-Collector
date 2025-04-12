@@ -1,4 +1,5 @@
 #include "object.h"
+#include "vm.h"
 
 object_t *__new_integer__(int value) {
     object_t *new_int = malloc(sizeof(object_t));
@@ -39,9 +40,9 @@ object_t *__new_vector3__(object_t *x, object_t *y, object_t *z)
     if (!new_object)
         return (NULL);
     new_object->type = VECTOR3;
-    refCount_inc(x);
-    refCount_inc(y);
-    refCount_inc(z);
+    //refCount_inc(x);
+    //refCount_inc(y);
+    //refCount_inc(z);
     new_object->data.v_vector3 = (vector_t){x, y, z};
     return (new_object);
 }
@@ -67,8 +68,8 @@ bool     array_set(object_t *object, size_t index, object_t *value)
     if (!object || !value || object->type != ARRAY \
         || object->data.v_array.size <= index)
         return (false);
-    refCount_dec(object->data.v_array.elements[index]);
-    refCount_inc(value);
+    //refCount_dec(object->data.v_array.elements[index]);
+    //refCount_inc(value);
     object->data.v_array.elements[index] = value;;
     return (true);
 }
@@ -96,52 +97,38 @@ int      length(object_t *object)
         return (-1);
 }
 
-object_t *__new_object__()
+object_t *__new_object__(vm_t *vm)
 {
     object_t *new_object = calloc(1, sizeof(object_t));
     if (!new_object)
         return (NULL);
-    new_object->refcount = 1;
+    new_object->is_marked = false;
+    vm_track_object(vm, new_object);
     return (new_object);
 }
 
-void    refCount_inc(object_t *object)
+void    __free_object__(object_t *obj)
 {
-    if (!object)
-        return ;
-    object->refcount += 1;
-}
-
-void    refCount_dec(object_t *object)
-{
-    if (!object)
-        return ;
-    object->refcount -= 1;
-    if (object->refcount == 0)
-        return (refCount_free(object));
-}
-
-void    refCount_free(object_t *object)
-{
-    if (object->type == INTEGER || object->type == FLOAT)
-        free(object);
-    else if (object->type == STRING)
-    {
-        free(object->data.v_string);
-        free(object);
-    }
-    else if (object->type == VECTOR3)
-    {
-        refCount_dec(object->data.v_vector3.x);
-        refCount_dec(object->data.v_vector3.y);
-        refCount_dec(object->data.v_vector3.z);
-    }
-    else if (object->type == ARRAY)
-    {
-        for (size_t i = 0; i < object->data.v_array.size; i++)
-        {
-            refCount_dec(object->data.v_array.elements[i]);
-        }
-        free(object->data.v_array.elements);
-    }
+   switch (obj->type)
+   {
+       case INTEGER:
+       case FLOAT:
+            break ;
+       case STRING:
+            free(obj->data.v_string);
+            break ;
+       case VECTOR3:
+            break ;
+        case ARRAY:
+          {
+            array_t *array = &obj->data.v_array;
+            for (size_t i = 0; i < array->size; ++i)
+            {
+                free(array->elements[i]);
+            }
+            free(array->elements);
+          }
+          break ;
+   }
+   free(obj); 
 }
